@@ -96,7 +96,7 @@ export default {
 
           let res = null
           const data = await this.data()
-
+          console.log(data)
           if (this.otherAction != null) await this.otherAction()
           const { id, ...insertAbleData } = data
 

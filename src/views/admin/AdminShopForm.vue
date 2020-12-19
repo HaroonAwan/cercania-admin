@@ -4,6 +4,7 @@
       :after-action="clearItem"
       :updater="!isNew"
       :other-action="() => {}"
+      :before-action="checkImage"
       :title="isNew ? 'Create New Shop' : 'Edit Shop Details'"
       collection="shops"
       :data="parseData"
@@ -18,7 +19,7 @@
             :index="0"
             folder="images"
             @removed="shop.image = null"
-            @uploaded="shop.image = $event"
+            @uploaded="imageUploaded"
             style="width: 130px; height: 130px; border-radius: 70px"
             :source="shop.image"
           />
@@ -137,6 +138,14 @@
       />
       <v-checkbox v-model="shop.disabled" label="Blocked" />
     </form-firebase>
+    <v-dialog v-model="error" max-width="350">
+      <v-card>
+        <v-card-title>Warning</v-card-title>
+        <v-card-text>
+          <p style="text-align: left">Wait for image to upload!</p>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </form-layout>
 </template>
 
@@ -151,7 +160,9 @@ export default {
 
   data: () => ({
     isNew: true,
-    shop: {}
+    shop: {},
+    uploaded: false,
+    error: false
   }),
 
   mounted() {
@@ -167,6 +178,7 @@ export default {
 
   methods: {
     pickFile(event) {
+      this.uploaded = true
       if (event.target.files.length > 0) {
         this.shop.image = { file: event.target.files[0] }
         this.shop = { ...this.shop }
@@ -177,7 +189,23 @@ export default {
     },
 
     clearItem() {
-      localStorage.delete('__product' + this.$route.params.id)
+      localStorage.removeItem('__product' + this.$route.params.id)
+    },
+
+    imageUploaded($event) {
+      this.shop.image = $event
+      this.uploaded = false
+    },
+
+    checkImage() {
+      console.log(this.uploaded)
+      if (this.uploaded === true) {
+        this.error = true
+        return false
+      } else {
+        this.error = false
+        return true
+      }
     }
   }
 }
